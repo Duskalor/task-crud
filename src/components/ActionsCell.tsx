@@ -11,6 +11,7 @@ import {
 } from './ui/dropdown-menu';
 import { Button } from './ui/button';
 import { MoreHorizontal } from 'lucide-react';
+import { AlertDialogDelete } from './alert-dialog-delete';
 
 interface Props {
   row: { original: { categories_id: string } };
@@ -42,8 +43,8 @@ export const ActionsCell = ({ row }: Props) => {
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <DropdownMenuItem>Edit</DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleDelete} className='text-red-600'>
-          Delete
+        <DropdownMenuItem className='text-red-600'>
+          <AlertDialogDelete deleteCategory={() => handleDelete()} />
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
