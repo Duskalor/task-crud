@@ -7,7 +7,6 @@ import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
@@ -28,6 +27,7 @@ import { DialogNewCategory } from '@/components/dialog-new-category';
 
 import { ActionsCell } from '@/components/ActionsCell';
 import { supabase } from '@/utils/supabase/client';
+import { redirect } from 'next/navigation';
 
 export type Category = {
   categories_id: string;
@@ -76,9 +76,7 @@ export function DataTableDemo({ categories }: { categories: Category[] }) {
   const table = useReactTable({
     data,
     columns,
-    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     state: {
@@ -86,16 +84,16 @@ export function DataTableDemo({ categories }: { categories: Category[] }) {
       globalFilter: filtered,
     },
     onGlobalFilterChange: setFiltered,
+    onSortingChange: setSorting,
   });
 
   useEffect(() => {
     const subscription = supabase
-      .channel('realtime:table_changes') // Identificador único del canal
+      .channel('realtime:table_changes')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'categories' },
         (payload) => {
-          // console.log('Cambio detectado:', payload);
           if (payload.eventType === 'INSERT') {
             setData((prev) => [...prev, payload.new as Category]);
           } else if (payload.eventType === 'DELETE') {
@@ -117,7 +115,6 @@ export function DataTableDemo({ categories }: { categories: Category[] }) {
       )
       .subscribe();
 
-    // Limpiar la suscripción al desmontar el componente
     return () => {
       supabase.removeChannel(subscription);
     };
@@ -162,7 +159,13 @@ export function DataTableDemo({ categories }: { categories: Category[] }) {
                   data-state={row.getIsSelected() && 'selected'}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell
+                      key={cell.id}
+                      className='cursor-pointer'
+                      onClick={() =>
+                        redirect(`/categories/${row.original.categories_id}`)
+                      }
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()

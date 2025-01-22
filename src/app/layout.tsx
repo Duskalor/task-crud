@@ -32,7 +32,7 @@ export default function RootLayout({
         <SidebarProvider>
           <AppSidebar />
           <SidebarTrigger />
-          {children}
+          <div className='w-full p-5'>{children}</div>
         </SidebarProvider>
       </body>
     </html>

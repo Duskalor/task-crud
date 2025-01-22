@@ -14,7 +14,7 @@ export function AlertDialogDelete({
   deleteCategory: () => void;
 }) {
   return (
-    <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+    <AlertDialogContent>
       <AlertDialogHeader>
         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
         <AlertDialogDescription>
