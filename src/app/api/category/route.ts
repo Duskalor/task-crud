@@ -7,7 +7,7 @@ export async function POST(request: Request) {
   const { name, description } = body;
   if (name === '' || description === '')
     return new Response(
-      JSON.stringify({ error: 'Missing name or description' }),
+      JSON.stringify({ error: 'Missing name or description for category' }),
       {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
       headers: { 'Content-Type': 'application/json' },
     });
   }
-  return new Response(JSON.stringify({ message: `Usuario ${name} creado` }), {
+  return new Response(JSON.stringify({ message: `Category ${name} created` }), {
     status: 201,
     headers: { 'Content-Type': 'application/json' },
   });

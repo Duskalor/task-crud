@@ -12,6 +12,7 @@ import {
 import { Button } from './ui/button';
 import { MoreHorizontal } from 'lucide-react';
 import { AlertDialogDelete } from './alert-dialog-delete';
+import { AlertDialog, AlertDialogTrigger } from './ui/alert-dialog';
 
 interface Props {
   row: { original: { categories_id: string } };
@@ -32,21 +33,26 @@ export const ActionsCell = ({ row }: Props) => {
     }
   };
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant='ghost' className='h-8 w-8 p-0'>
-          <span className='sr-only'>Open menu</span>
-          <MoreHorizontal />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align='end'>
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-        <DropdownMenuItem>Edit</DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem className='text-red-600'>
-          <AlertDialogDelete deleteCategory={() => handleDelete()} />
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <AlertDialog>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant='ghost' className='h-8 w-8 p-0'>
+            <span className='sr-only'>Open menu</span>
+            <MoreHorizontal />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align='end'>
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuItem>Edit</DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem className='text-red-600'>
+            <AlertDialogTrigger asChild>
+              <span>Delete</span>
+            </AlertDialogTrigger>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <AlertDialogDelete deleteCategory={handleDelete} />
+    </AlertDialog>
   );
 };

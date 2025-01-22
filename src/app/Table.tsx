@@ -56,7 +56,7 @@ export const columns: ColumnDef<Category>[] = [
   },
   {
     accessorKey: 'description',
-    header: () => <div className='text-right'>Description</div>,
+    header: () => <div className=''>Description</div>,
     cell: ({ row }) => (
       <div className='lowercase'>{row.getValue('description')}</div>
     ),
