@@ -27,7 +27,7 @@ import { DialogNewCategory } from '@/components/dialog-new-category';
 
 import { ActionsCell } from '@/components/ActionsCell';
 import { supabase } from '@/utils/supabase/client';
-import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 export type Category = {
   categories_id: string;
@@ -72,7 +72,7 @@ export function DataTableDemo({ categories }: { categories: Category[] }) {
   const [data, setData] = useState(categories);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [filtered, setFiltered] = useState('');
-
+  const router = useRouter();
   const table = useReactTable({
     data,
     columns,
@@ -162,9 +162,11 @@ export function DataTableDemo({ categories }: { categories: Category[] }) {
                     <TableCell
                       key={cell.id}
                       className='cursor-pointer'
-                      onClick={() =>
-                        redirect(`/categories/${row.original.categories_id}`)
-                      }
+                      onClick={() => {
+                        router.push(
+                          `/categories/${row.original.categories_id}`
+                        );
+                      }}
                     >
                       {flexRender(
                         cell.column.columnDef.cell,

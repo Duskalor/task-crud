@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
+import RedirectComponent from '@/components/RedirectComponent';
 
 export default async function HomePage() {
-  redirect('/dashboard');
+  return <RedirectComponent />;
 }
