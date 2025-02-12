@@ -22,7 +22,6 @@ const schema = z.object({
 
 export function DialogNewTask({ categories_id }: { categories_id: string }) {
   const [open, setopen] = useState(false);
-  // const navigate = useRouter();
   console.log(categories_id);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -38,7 +37,6 @@ export function DialogNewTask({ categories_id }: { categories_id: string }) {
       });
 
       setopen(false);
-      // navigate.push('/');
     } catch (error) {
       console.error('Failed to add task', error);
     }

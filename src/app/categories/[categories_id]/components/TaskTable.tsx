@@ -1,6 +1,7 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   TableHeader,
   TableRow,
@@ -31,6 +32,7 @@ export type Task = {
   description: string;
   status: { name: string };
 };
+const CustomTableRow = motion(TableRow);
 
 export const columns: ColumnDef<Task>[] = [
   {
@@ -41,7 +43,7 @@ export const columns: ColumnDef<Task>[] = [
           variant='ghost'
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         >
-          Category
+          Task
           <ArrowUpDown />
         </Button>
       );
@@ -93,33 +95,47 @@ export const TaskTable = ({
   });
 
   useEffect(() => {
+    const fetchStatus = async (statusId: string) => {
+      const { data: status, error } = await supabase
+        .from('status')
+        .select('*')
+        .eq('status_id', statusId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching status:', error);
+        return null;
+      }
+
+      return status;
+    };
+
     const subscription = supabase
       .channel('realtime:table_changes')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'task' },
-        (payload) => {
+        async (payload) => {
           if (payload.eventType === 'INSERT') {
-            supabase
-              .from('status')
-              .select('*')
-              .eq('status_id', payload.new.status_id)
-              .single()
-              .then((status) => {
-                setData((prev) => [...prev, payload.new as Task]);
-              });
+            const status = await fetchStatus(payload.new.status_id);
+            if (status) {
+              setData((prev) => [...prev, { ...payload.new, status } as Task]);
+            }
           } else if (payload.eventType === 'DELETE') {
             setData((prev) =>
               prev.filter((item) => item.task_id !== payload.old.task_id)
             );
           } else if (payload.eventType === 'UPDATE') {
-            setData((prev) =>
-              prev.map((item) =>
-                item.task_id === payload.new.task_id
-                  ? (payload.new as Task)
-                  : item
-              )
-            );
+            const status = await fetchStatus(payload.new.status_id);
+            if (status) {
+              setData((prev) =>
+                prev.map((item) =>
+                  item.task_id === payload.new.task_id
+                    ? ({ ...payload.new, status } as Task)
+                    : item
+                )
+              );
+            }
           }
         }
       )
@@ -163,21 +179,27 @@ export const TaskTable = ({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              <AnimatePresence>
+                {table.getRowModel().rows.map((row) => (
+                  <CustomTableRow
+                    data-state={row.getIsSelected() && 'selected'}
+                    key={row.id}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </CustomTableRow>
+                ))}
+              </AnimatePresence>
             ) : (
               <TableRow>
                 <TableCell
