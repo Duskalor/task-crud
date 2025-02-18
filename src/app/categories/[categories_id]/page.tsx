@@ -1,10 +1,12 @@
 import { createClient } from '@/utils/supabase/server';
-import { Params } from 'next/dist/server/request/params';
 import React from 'react';
 import { TaskTable } from './components/TaskTable';
 
-//@next-codemod-ignore
-export default async function Page({ params }: { params: Params }) {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ categories_id: string }>;
+}) {
   const { categories_id } = await params;
   console.log(categories_id);
   if (!categories_id) return <div>No categories_id found</div>;
