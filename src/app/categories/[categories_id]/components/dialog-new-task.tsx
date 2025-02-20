@@ -11,8 +11,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/utils/supabase/client';
-// import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { z } from 'zod';
 
 const schema = z.object({
@@ -22,7 +21,6 @@ const schema = z.object({
 
 export function DialogNewTask({ categories_id }: { categories_id: string }) {
   const [open, setopen] = useState(false);
-  console.log(categories_id);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -41,6 +39,18 @@ export function DialogNewTask({ categories_id }: { categories_id: string }) {
       console.error('Failed to add task', error);
     }
   };
+
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setopen((open) => !open);
+      }
+    };
+
+    document.addEventListener('keydown', down);
+    return () => document.removeEventListener('keydown', down);
+  }, []);
 
   return (
     <Dialog open={open} onOpenChange={setopen}>

@@ -21,7 +21,7 @@ import {
   ColumnDef,
 } from '@tanstack/react-table';
 import { ArrowUpDown } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ActionsCell } from './ActionsCell';
 import { StatusCell } from './StatusCell';
 import { DialogNewTask } from './dialog-new-task';
@@ -32,7 +32,9 @@ export type Task = {
   description: string;
   status: { name: string };
 };
-const CustomTableRow = motion(TableRow);
+const CustomTableRow = motion.create(TableRow);
+const CustomTableBody = motion.create(TableBody);
+const CustomTableCell = motion.create(TableCell);
 
 export const columns: ColumnDef<Task>[] = [
   {
@@ -49,14 +51,22 @@ export const columns: ColumnDef<Task>[] = [
       );
     },
     cell: ({ row }) => (
-      <div className='lowercase p-2'>{row.getValue('name')}</div>
+      <div className='lowercase p-2'>
+        {(row.getValue('name') as string).length > 15
+          ? (row.getValue('name') as string).slice(0, 15) + '...'
+          : row.getValue('name')}
+      </div>
     ),
   },
   {
     accessorKey: 'description',
     header: () => <div className=''>Description</div>,
     cell: ({ row }) => (
-      <div className='lowercase'>{row.getValue('description')}</div>
+      <div className='lowercase'>
+        {(row.getValue('description') as string).length > 15
+          ? (row.getValue('description') as string).slice(0, 15) + '...'
+          : row.getValue('description')}
+      </div>
     ),
   },
   {
@@ -80,6 +90,7 @@ export const TaskTable = ({
   const [data, setData] = useState(tasks);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [filtered, setFiltered] = useState('');
+
   const table = useReactTable({
     data,
     columns,
@@ -147,8 +158,8 @@ export const TaskTable = ({
   }, []);
 
   return (
-    <div className='w-full'>
-      <div className='flex items-center justify-between py-4'>
+    <div className='w-full flex flex-col h-full overflow-hidden'>
+      <div className='flex items-center  flex-col sm:flex-row gap-5 sm:gap-0 justify-between py-4'>
         <Input
           placeholder='Filters...'
           className='max-w-sm'
@@ -157,8 +168,8 @@ export const TaskTable = ({
         />
         <DialogNewTask categories_id={categories_id} />
       </div>
-      <div className='rounded-md border'>
-        <Table className={`w-${table.getTotalSize()} mx-auto`}>
+      <div className='rounded-md border h-full max-h-[790px] overflow-y-auto'>
+        <Table className={`max-w-3xl mx-auto`}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -180,25 +191,34 @@ export const TaskTable = ({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               <AnimatePresence>
-                {table.getRowModel().rows.map((row) => (
-                  <CustomTableRow
-                    data-state={row.getIsSelected() && 'selected'}
-                    key={row.id}
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </CustomTableRow>
-                ))}
+                {table.getRowModel().rows.map((row, i) => {
+                  const id = row.original.task_id;
+                  return (
+                    <CustomTableRow
+                      key={id}
+                      layout='position'
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{
+                        opacity: 0,
+                        y: -10,
+                        position: 'absolute',
+                        width: '100%',
+                        pointerEvents: 'none',
+                      }}
+                      transition={{ duration: 0.3, delay: 0.1 + i * 0.05 }}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      ))}
+                    </CustomTableRow>
+                  );
+                })}
               </AnimatePresence>
             ) : (
               <TableRow>
