@@ -21,7 +21,7 @@ import {
   ColumnDef,
 } from '@tanstack/react-table';
 import { ArrowUpDown } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { ActionsCell } from './ActionsCell';
 import { StatusCell } from './StatusCell';
 import { DialogNewTask } from './dialog-new-task';
@@ -33,8 +33,6 @@ export type Task = {
   status: { name: string };
 };
 const CustomTableRow = motion.create(TableRow);
-const CustomTableBody = motion.create(TableBody);
-const CustomTableCell = motion.create(TableCell);
 
 export const columns: ColumnDef<Task>[] = [
   {
@@ -83,9 +81,11 @@ export const columns: ColumnDef<Task>[] = [
 export const TaskTable = ({
   tasks,
   categories_id,
+  status,
 }: {
   tasks: Task[];
   categories_id: string;
+  status: { id: string; name: string }[];
 }) => {
   const [data, setData] = useState(tasks);
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -107,18 +107,8 @@ export const TaskTable = ({
 
   useEffect(() => {
     const fetchStatus = async (statusId: string) => {
-      const { data: status, error } = await supabase
-        .from('status')
-        .select('*')
-        .eq('status_id', statusId)
-        .single();
-
-      if (error) {
-        console.error('Error fetching status:', error);
-        return null;
-      }
-
-      return status;
+      const data = status.find((status) => status.id === statusId);
+      return { name: data ? data.name : 'in progress' };
     };
 
     const subscription = supabase
@@ -128,21 +118,24 @@ export const TaskTable = ({
         { event: '*', schema: 'public', table: 'task' },
         async (payload) => {
           if (payload.eventType === 'INSERT') {
-            const status = await fetchStatus(payload.new.status_id);
-            if (status) {
-              setData((prev) => [...prev, { ...payload.new, status } as Task]);
+            const selectStatus = await fetchStatus(payload.new.status_id);
+            if (selectStatus) {
+              setData((prev) => [
+                ...prev,
+                { ...payload.new, status: selectStatus } as Task,
+              ]);
             }
           } else if (payload.eventType === 'DELETE') {
             setData((prev) =>
               prev.filter((item) => item.task_id !== payload.old.task_id)
             );
           } else if (payload.eventType === 'UPDATE') {
-            const status = await fetchStatus(payload.new.status_id);
-            if (status) {
+            const selectStatus = await fetchStatus(payload.new.status_id);
+            if (selectStatus) {
               setData((prev) =>
                 prev.map((item) =>
                   item.task_id === payload.new.task_id
-                    ? ({ ...payload.new, status } as Task)
+                    ? ({ ...payload.new, status: selectStatus } as Task)
                     : item
                 )
               );

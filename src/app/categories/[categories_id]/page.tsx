@@ -16,6 +16,21 @@ export default async function Page({
     .eq('categories_id', categories_id);
   // .order('created_at', { ascending: false });
 
+  const { data: status, error } = await supabase.from('status').select('*');
+
+  if (error) return <div>No status found</div>;
+
+  const statusOptions = status.map((status) => ({
+    name: status.name,
+    id: status.status_id,
+  }));
+
   if (!tasks) return <div>No tasks found</div>;
-  return <TaskTable tasks={tasks} categories_id={String(categories_id)} />;
+  return (
+    <TaskTable
+      tasks={tasks}
+      categories_id={String(categories_id)}
+      status={statusOptions}
+    />
+  );
 }
