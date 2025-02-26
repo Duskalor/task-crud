@@ -8,33 +8,50 @@ export default async function Page({
   params: Promise<{ categories_id: string }>;
 }) {
   const { categories_id } = await params;
-  if (!categories_id) return <div>No categories_id found</div>;
+  if (!categories_id) throw new Error('No categories_id found');
   const supabase = await createClient();
+  try {
+    const [categoryResponse, tasksResponse, statusResponse] = await Promise.all(
+      [
+        supabase
+          .from('categories')
+          .select('*')
+          .eq('categories_id', categories_id)
+          .single(),
 
-  const { data: tasks, error: errorTasks } = await supabase
-    .from('task')
-    .select('*, status(*)')
-    .eq('categories_id', categories_id);
-  // .order('created_at', { ascending: false });
+        supabase
+          .from('task')
+          .select('*, status(*)')
+          .eq('categories_id', categories_id)
+          .order('created_at', { ascending: true }),
 
-  if (errorTasks) return <div>No tasks found</div>;
+        supabase.from('status').select('*'),
+      ]
+    );
 
-  const { data: status, error: errorStatus } = await supabase
-    .from('status')
-    .select('*');
+    const { data: category, error: errorCategories } = categoryResponse;
+    const { data: tasks, error: errorTasks } = tasksResponse;
+    const { data: status, error: errorStatus } = statusResponse;
 
-  if (errorStatus) return <div>No status found</div>;
+    if (errorCategories) throw new Error('Error fetching category');
+    if (errorTasks) throw new Error('Error fetching tasks');
+    if (errorStatus) throw new Error('Error fetching status');
 
-  const statusOptions = status.map((status) => ({
-    name: status.name,
-    id: status.status_id,
-  }));
+    const statusOptions = status.map((statusItem) => ({
+      name: statusItem.name,
+      id: statusItem.status_id,
+    }));
 
-  return (
-    <TaskTable
-      tasks={tasks}
-      categories_id={String(categories_id)}
-      status={statusOptions}
-    />
-  );
+    return (
+      <TaskTable
+        categoriesName={category.name}
+        tasks={tasks}
+        categories_id={categories_id}
+        status={statusOptions}
+      />
+    );
+  } catch (error) {
+    console.error(error);
+    return <div>An error occurred while fetching data</div>;
+  }
 }

@@ -4,8 +4,9 @@ import { Task } from '@/types/Task';
 import { IStatus } from '@/types/Status';
 import { actionsRealTime } from '@/lib/realtime-supabase';
 
-export const useRealTime = (tasks: Task[], status: IStatus) => {
-  const [data, setData] = useState<Task[]>(tasks);
+export const useRealTime = (initalTasks: Task[], status: IStatus) => {
+  const [tasks, setTasks] = useState<Task[]>(initalTasks);
+
   useEffect(() => {
     const { actions } = actionsRealTime(status);
     const subscription = supabase
@@ -15,8 +16,7 @@ export const useRealTime = (tasks: Task[], status: IStatus) => {
         { event: '*', schema: 'public', table: 'task' },
         async (payload: any) => {
           const action = actions[payload.eventType];
-          const newData = action(data, payload);
-          setData(newData);
+          setTasks((prev) => action(prev, payload));
         }
       )
       .subscribe();
@@ -26,5 +26,5 @@ export const useRealTime = (tasks: Task[], status: IStatus) => {
     };
   }, []);
 
-  return { data, setData };
+  return { data: tasks };
 };

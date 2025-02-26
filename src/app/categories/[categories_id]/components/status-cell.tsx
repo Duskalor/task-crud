@@ -1,21 +1,21 @@
 import React from 'react';
-import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Task } from '@/types/Task';
 
 type StatusKey = 'to do' | 'in_progress' | 'done';
 
-type Props = {
-  row: { original: { status: { name: string } } };
-};
-
 // type Variants = 'red' | 'yellow' | 'green';
+
+const changedStatus: Record<string, string> = {
+  ['To Do']: 'to do',
+  'In Progress': 'in_progress',
+  Done: 'done',
+};
 
 const status = {
   ['to do']: {
@@ -35,10 +35,27 @@ const status = {
 const selectColor = (text: string) => {
   return status[text as StatusKey];
 };
+type Props = {
+  row: { original: { status: { name: string }; task_id: string } };
+  table: {
+    options: {
+      meta: { updateTask: (id: string, data: Partial<Task>) => void };
+    };
+  };
+};
 
-export const StatusCell = ({ row }: Props) => {
+export const StatusCell = ({ row, table }: any) => {
   const nameCell = row.original.status.name;
   const selectedColor = selectColor(nameCell);
+  const changestatus = table.options.meta.updateTask;
+
+  const handleChangeStatus = async (status: string) => {
+    changestatus(row.original.task_id, {
+      ...row.original,
+      status: changedStatus[status],
+    });
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className='w-full h-full flex justify-center select-none '>
@@ -54,6 +71,7 @@ export const StatusCell = ({ row }: Props) => {
         {Object.values(status).map((value) => (
           <DropdownMenuItem
             key={value.name}
+            onClick={() => handleChangeStatus(value.name)}
             className={`bg-${value.color}-500 text-white font-bold select-none`}
           >
             {value.name}
