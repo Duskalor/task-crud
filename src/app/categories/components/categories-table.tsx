@@ -50,6 +50,7 @@ const columns: ColumnDef<Category>[] = [
     ),
   },
   {
+    header: () => <div className='text-center '>Actions</div>,
     id: 'actions',
     enableHiding: false,
     cell: ActionsCell,
