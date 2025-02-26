@@ -1,6 +1,6 @@
 import React from 'react';
-import { DataTableDemo } from '../Table';
 import { createClient } from '@/utils/supabase/server';
+import { CategoriesTable } from './components/categories-table';
 
 const page = async () => {
   const supabase = await createClient();
@@ -8,10 +8,10 @@ const page = async () => {
     .from('categories')
     .select('*');
   if (error) console.log(error);
-  if (!categories) return <div>No categories found</div>;
+  if (error) return <div>No categories found</div>;
   return (
-    <section>
-      <DataTableDemo categories={categories} />
+    <section className='h-full'>
+      <CategoriesTable categories={categories} />
     </section>
   );
 };

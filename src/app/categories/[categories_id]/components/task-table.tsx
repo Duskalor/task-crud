@@ -1,8 +1,15 @@
 'use client';
-import { Button, buttonVariants } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { motion, AnimatePresence } from 'framer-motion';
-
+import { useState } from 'react';
+import { DialogNewTask } from './dialog-new-task';
+import { useRealTime } from '@/hooks/use-real-time';
+import { Task } from '@/types/Task';
+import { IStatus } from '@/types/Status';
+import { supabase } from '@/utils/supabase/client';
+import { StatusCell } from './status-cell';
+import { ActionsCell } from './actions-cell';
+import { ArrowDown, ArrowUp } from 'lucide-react';
 import {
   SortingState,
   useReactTable,
@@ -12,36 +19,27 @@ import {
   flexRender,
   ColumnDef,
 } from '@tanstack/react-table';
-import { ArrowUpDown } from 'lucide-react';
-import { useState } from 'react';
-import { ActionsCell } from './ActionsCell';
-import { StatusCell } from './StatusCell';
-import { DialogNewTask } from './dialog-new-task';
-import { tasksExample } from '@/app/test/page';
-import { useRealTime } from '@/hooks/useRealTime';
-import { Task } from '@/types/Task';
-import { IStatus } from '@/types/Status';
 
-export const columns: ColumnDef<Task>[] = [
+const columns: ColumnDef<Task>[] = [
   {
     accessorKey: 'name',
     header: ({ column }) => {
       return (
         <div
           className=' px-6 py-4 cursor-pointer select-none flex items-center gap-2 font-semibold text-gray-700'
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          onClick={() => column.toggleSorting()}
         >
           Task
-          <ArrowUpDown className='w-4 h-4' />
+          {{
+            asc: <ArrowUp className='w-4 h-4' />,
+            desc: <ArrowDown className='w-4 h-4' />,
+          }[column.getIsSorted() as string] ?? null}
         </div>
       );
     },
     cell: ({ row }) => {
       const task = row.original as Task;
       const name: string = row.getValue('name');
-      // (row.getValue('name') as string).length > 15
-      //   ? (row.getValue('name') as string).slice(0, 15) + '...'
-      //   : row.getValue('name');
       return (
         <div className=''>
           <p className='font-semibold text-gray-900'>{name}</p>
@@ -50,31 +48,21 @@ export const columns: ColumnDef<Task>[] = [
       );
     },
   },
-  // {
-  //   accessorKey: 'description',
-  //   header: () => <div className=''>Description</div>,
-  //   cell: ({ row }) => (
-  //     <div className='lowercase'>
-  //       {(row.getValue('description') as string).length > 15
-  //         ? (row.getValue('description') as string).slice(0, 15) + '...'
-  //         : row.getValue('description')}
-  //     </div>
-  //   ),
-  // },
   {
     accessorKey: 'status_id',
     header: () => <div className='text-center'>Status</div>,
     cell: StatusCell,
+    enableSorting: false,
   },
   {
-    header: () => (
-      <div className='text-center active:bg-sidebar-primary'>Actions</div>
-    ),
+    header: () => <div className='text-center '>Actions</div>,
     id: 'actions',
     enableHiding: false,
     cell: ActionsCell,
+    enableSorting: false,
   },
 ];
+
 export const TaskTable = ({
   tasks,
   categories_id,
@@ -84,8 +72,7 @@ export const TaskTable = ({
   categories_id: string;
   status: IStatus;
 }) => {
-  // const [data, setData] = useState(tasksExample);
-  const { data, setData } = useRealTime(tasksExample, status);
+  const { data, setData } = useRealTime(tasks, status);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [filtered, setFiltered] = useState('');
 
@@ -101,6 +88,15 @@ export const TaskTable = ({
     },
     onGlobalFilterChange: setFiltered,
     onSortingChange: setSorting,
+    meta: {
+      updateTask: async (task_id: string, data: Partial<Task>) => {
+        const res = await supabase
+          .from('task')
+          .update(data)
+          .eq('task_id', task_id);
+        console.log({ res });
+      },
+    },
   });
 
   return (
@@ -114,7 +110,7 @@ export const TaskTable = ({
         />
         <DialogNewTask categories_id={categories_id} />
       </div>
-      <div className=' w-full  mt-10'>
+      <div className=' w-full'>
         <div className=' max-w-2xl mx-auto overflow-hidden rounded-lg shadow-lg bg-white'>
           <table className='w-full'>
             <thead className='bg-gray-100'>
@@ -124,8 +120,7 @@ export const TaskTable = ({
                     return (
                       <th
                         key={header.id}
-                        className='font-semibold text-gray-700'
-                        // style={{ width: header.getSize() }}
+                        className='font-semibold text-gray-700 select-none'
                       >
                         {header.isPlaceholder
                           ? null
@@ -183,75 +178,6 @@ export const TaskTable = ({
           </table>
         </div>
       </div>
-      {/* <div className=' border h-full max-h-[790px] overflow-y-auto '>
-        <table className={`max-w-2xl mx-auto mt-5  shadow-lg  rounded-lg`}>
-          <thead className='bg-gray-100'>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id} className=''>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <td
-                      key={header.id}
-                      className='font-semibold text-gray-700 px-6 py-4'
-                      style={{ width: header.getSize() }}
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {table.getRowModel().rows?.length ? (
-              <AnimatePresence>
-                {table.getRowModel().rows.map((row, i) => {
-                  const id = row.original.task_id;
-                  return (
-                    <CustomTableRow
-                      key={id}
-                      layout='position'
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{
-                        opacity: 0,
-                        y: -10,
-                        position: 'absolute',
-                        width: '100%',
-                        pointerEvents: 'none',
-                      }}
-                      transition={{ duration: 0.3, delay: 0.1 + i * 0.05 }}
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </TableCell>
-                      ))}
-                    </CustomTableRow>
-                  );
-                })}
-              </AnimatePresence>
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className='h-24 text-center'
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </tbody>
-        </table>
-      </div> */}
     </div>
   );
 };
