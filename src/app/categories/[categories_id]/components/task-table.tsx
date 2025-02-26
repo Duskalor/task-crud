@@ -155,7 +155,11 @@ export const TaskTable = ({
         </h2>
       </div>
       <div className=' w-full'>
-        <div className=' max-w-3xl mx-auto overflow-x-scroll rounded-lg shadow-lg bg-white'>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className=' max-w-3xl mx-auto  rounded-lg shadow-lg bg-white'
+        >
           <table className='w-full'>
             <thead className='bg-gray-100'>
               {table.getHeaderGroups().map((headerGroup) => (
@@ -189,11 +193,10 @@ export const TaskTable = ({
                         className='border-b hover:bg-gray-50 transition'
                         key={id}
                         layout='position'
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
                         exit={{
                           opacity: 0,
-                          y: -10,
                           position: 'absolute',
                           width: '100%',
                           pointerEvents: 'none',
@@ -221,7 +224,7 @@ export const TaskTable = ({
               )}
             </tbody>
           </table>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

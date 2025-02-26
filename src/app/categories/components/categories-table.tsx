@@ -121,7 +121,13 @@ export function CategoriesTable({ categories }: { categories: Category[] }) {
         <DialogNewCategory />
       </div>
       <div className=' w-full  mt-10'>
-        <div className=' max-w-2xl mx-auto overflow-hidden rounded-lg shadow-lg bg-white'>
+        <motion.div
+          layout
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className=' max-w-2xl mx-auto overflow-hidden rounded-lg shadow-lg bg-white'
+        >
           <table className='w-full'>
             <thead className='bg-gray-100'>
               {table.getHeaderGroups().map((headerGroup) => (
@@ -154,8 +160,8 @@ export function CategoriesTable({ categories }: { categories: Category[] }) {
                         className='border-b hover:bg-gray-50 transition'
                         key={id}
                         layout='position'
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
                         exit={{
                           opacity: 0,
                           y: -10,
@@ -194,7 +200,7 @@ export function CategoriesTable({ categories }: { categories: Category[] }) {
               )}
             </tbody>
           </table>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
