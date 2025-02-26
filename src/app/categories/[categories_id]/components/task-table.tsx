@@ -137,20 +137,25 @@ export const TaskTable = ({
 
   return (
     <div className='w-full flex flex-col h-full overflow-hidden'>
-      <div className=' relative flex items-center flex-col sm:flex-row gap-5 sm:gap-0 justify-between py-4'>
-        <Input
-          placeholder='Filters...'
-          className='max-w-sm'
-          value={filtered}
-          onChange={(e) => setFiltered(e.target.value)}
-        />
-        <h2 className='absolute left-1/2 transform -translate-x-1/2 text-4xl capitalize font-bold'>
+      <div className='ml-2 w-full  relative flex items-center flex-col sm:flex-row gap-5 sm:gap-0 justify-between py-4'>
+        <h2 className='text-2xl sm:hidden capitalize font-bold text-center'>
           {categoriesName}
         </h2>
-        <DialogNewTask categories_id={categories_id} />
+        <div className='flex w-full px-3 justify-between items-center gap-3'>
+          <Input
+            placeholder='Filters...'
+            className='max-w-sm w-full sm:w-auto focus:outline-none'
+            value={filtered}
+            onChange={(e) => setFiltered(e.target.value)}
+          />
+          <DialogNewTask categories_id={categories_id} />
+        </div>
+        <h2 className='absolute hidden sm:block left-1/2 transform -translate-x-1/2 text-3xl capitalize font-bold'>
+          {categoriesName}
+        </h2>
       </div>
       <div className=' w-full'>
-        <div className=' max-w-3xl mx-auto overflow-hidden rounded-lg shadow-lg bg-white'>
+        <div className=' max-w-3xl mx-auto overflow-x-scroll rounded-lg shadow-lg bg-white'>
           <table className='w-full'>
             <thead className='bg-gray-100'>
               {table.getHeaderGroups().map((headerGroup) => (
