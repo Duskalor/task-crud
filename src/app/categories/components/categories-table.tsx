@@ -1,7 +1,7 @@
 'use client';
 'use no memo';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   ColumnDef,
   SortingState,
@@ -11,12 +11,13 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { ArrowUpDown } from 'lucide-react';
+import { ArrowDown, ArrowUp } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { ActionsCell } from '@/components/ActionsCell';
+import { ActionsCell } from '@/app/categories/components/actions-cell';
 import { supabase } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
 import { DialogNewCategory } from './dialog-new-category';
+import { useRealtimeCategory } from '@/hooks/use-real-time-category';
 export type Category = {
   categories_id: string;
   name: string;
@@ -31,26 +32,33 @@ const columns: ColumnDef<Category>[] = [
       return (
         <div
           className=' px-6 py-4 cursor-pointer select-none flex items-center gap-2 font-semibold text-gray-700'
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          onClick={() => column.toggleSorting()}
         >
           Category
-          <ArrowUpDown className='w-4 h-4' />
+          {{
+            asc: <ArrowUp className='w-4 h-4' />,
+            desc: <ArrowDown className='w-4 h-4' />,
+          }[column.getIsSorted() as string] ?? null}
         </div>
       );
     },
     cell: ({ row }) => (
-      <div className='lowercase p-2'>{row.getValue('name')}</div>
+      <div className='capitalize p-2 px-6 py-4 font-semibold text-gray-700 '>
+        {row.getValue('name')}
+      </div>
     ),
   },
   {
     accessorKey: 'description',
-    header: () => <div className='px-6'>Description</div>,
+    header: () => <div className='px-6 '>Description</div>,
     cell: ({ row }) => (
-      <div className='lowercase '>{row.getValue('description')}</div>
+      <div className='lowercase px-6 py-4 text-gray-700  '>
+        {row.getValue('description')}
+      </div>
     ),
   },
   {
-    header: () => <div className='text-center '>Actions</div>,
+    header: () => <div className='text-center  px-6 py-4 '>Actions</div>,
     id: 'actions',
     enableHiding: false,
     cell: ActionsCell,
@@ -58,10 +66,11 @@ const columns: ColumnDef<Category>[] = [
 ];
 
 export function CategoriesTable({ categories }: { categories: Category[] }) {
-  const [data, setData] = useState(categories);
+  const { data } = useRealtimeCategory(categories);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [filtered, setFiltered] = useState('');
   const router = useRouter();
+
   const table = useReactTable({
     data,
     columns,
@@ -74,40 +83,15 @@ export function CategoriesTable({ categories }: { categories: Category[] }) {
     },
     onGlobalFilterChange: setFiltered,
     onSortingChange: setSorting,
+    meta: {
+      updateCategory: async (categoryId: string, data: any) => {
+        await supabase
+          .from('categories')
+          .update(data)
+          .eq('categories_id', categoryId);
+      },
+    },
   });
-
-  useEffect(() => {
-    const subscription = supabase
-      .channel('realtime:table_changes')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'categories' },
-        (payload) => {
-          if (payload.eventType === 'INSERT') {
-            setData((prev) => [...prev, payload.new as Category]);
-          } else if (payload.eventType === 'DELETE') {
-            setData((prev) =>
-              prev.filter(
-                (item) => item.categories_id !== payload.old.categories_id
-              )
-            );
-          } else if (payload.eventType === 'UPDATE') {
-            setData((prev) =>
-              prev.map((item) =>
-                item.categories_id === payload.new.categories_id
-                  ? (payload.new as Category)
-                  : item
-              )
-            );
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(subscription);
-    };
-  }, []);
 
   return (
     <div className='w-full'>
@@ -126,7 +110,7 @@ export function CategoriesTable({ categories }: { categories: Category[] }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className=' max-w-2xl mx-auto overflow-hidden rounded-lg shadow-lg bg-white'
+          className=' max-w-3xl mx-auto overflow-hidden rounded-lg shadow-lg bg-white'
         >
           <table className='w-full'>
             <thead className='bg-gray-100'>
@@ -174,7 +158,7 @@ export function CategoriesTable({ categories }: { categories: Category[] }) {
                         {row.getVisibleCells().map((cell) => (
                           <td
                             key={cell.id}
-                            className='px-6 py-4 cursor-pointer'
+                            className='cursor-pointer'
                             onClick={() => {
                               router.push(
                                 `/categories/${row.original.categories_id}`

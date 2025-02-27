@@ -7,11 +7,14 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from './ui/dropdown-menu';
-import { Button } from './ui/button';
+} from '../../../components/ui/dropdown-menu';
+import { Button } from '../../../components/ui/button';
 import { MoreHorizontal } from 'lucide-react';
-import { AlertDialogDelete } from './alert-dialog-delete';
-import { AlertDialog, AlertDialogTrigger } from './ui/alert-dialog';
+import { AlertDialogDelete } from '../../../components/alert-dialog-delete';
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+} from '../../../components/ui/alert-dialog';
 
 interface Props {
   row: { original: { categories_id: string } };
@@ -19,6 +22,7 @@ interface Props {
 
 export const ActionsCell = ({ row }: Props) => {
   const { categories_id } = row.original;
+
   const handleDelete = async () => {
     const { error } = await supabase
       .from('categories')
@@ -28,8 +32,12 @@ export const ActionsCell = ({ row }: Props) => {
       console.log(error);
     }
   };
+
   return (
-    <div className='relative'>
+    <div
+      className='relative flex justify-center'
+      onClick={(e) => e.stopPropagation()}
+    >
       <AlertDialog>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

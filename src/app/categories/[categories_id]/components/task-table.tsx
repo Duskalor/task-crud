@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import { DialogNewTask } from './dialog-new-task';
-import { useRealTime } from '@/hooks/use-real-time';
+import { useRealTime } from '@/hooks/use-real-time-task';
 import { Task } from '@/types/Task';
 import { IStatus } from '@/types/Status';
 import { supabase } from '@/utils/supabase/client';
@@ -107,18 +107,15 @@ export const TaskTable = ({
 }) => {
   const { data } = useRealTime(tasks, status);
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [filtered, setFiltered] = useState('');
+  const [globalFilter, setFiltered] = useState('');
 
   const table = useReactTable({
     data,
     columns,
+    state: { sorting, globalFilter },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    state: {
-      sorting,
-      globalFilter: filtered,
-    },
     onGlobalFilterChange: setFiltered,
     onSortingChange: setSorting,
     meta: {
@@ -145,7 +142,7 @@ export const TaskTable = ({
           <Input
             placeholder='Filters...'
             className='max-w-sm w-full sm:w-auto focus:outline-none'
-            value={filtered}
+            value={globalFilter}
             onChange={(e) => setFiltered(e.target.value)}
           />
           <DialogNewTask categories_id={categories_id} />
