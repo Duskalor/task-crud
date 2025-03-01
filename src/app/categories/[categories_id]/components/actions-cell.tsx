@@ -11,14 +11,20 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal } from 'lucide-react';
-import React from 'react';
+import React, { useState } from 'react';
+import { DialogEditTask } from './dialog-edit-task';
+import { Task } from '@/types/Task';
+import { Dialog, DialogTrigger, DialogContent } from '@/components/ui/dialog';
 
 interface Props {
-  row: { original: { task_id: string } };
+  row: { original: Task };
 }
 
 export const ActionsCell = ({ row }: Props) => {
+  const [open, setOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const { task_id } = row.original;
+
   const handleDelete = async () => {
     const { error } = await supabase
       .from('task')
@@ -28,29 +34,47 @@ export const ActionsCell = ({ row }: Props) => {
       console.log(error);
     }
   };
+
   return (
     <div className='relative flex justify-center'>
-      <AlertDialog>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant='ghost' className='h-8 w-8 p-0'>
-              {/* <span className='sr-only'>Open menu</span> */}
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align='end'>
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem>Edit</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className='text-red-600 p-0'>
-              <AlertDialogTrigger asChild className='p-2'>
-                <span className='w-full'>Delete</span>
-              </AlertDialogTrigger>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <AlertDialogDelete deleteCategory={handleDelete} />
-      </AlertDialog>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <AlertDialog>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant='ghost' className='h-8 w-8 p-0'>
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align='end'>
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                <DialogTrigger asChild>
+                  <span
+                    className='w-full'
+                    onClick={() => setEditDialogOpen(true)}
+                  >
+                    Edit
+                  </span>
+                </DialogTrigger>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className='text-red-600 p-0'>
+                <AlertDialogTrigger asChild className='p-2'>
+                  <span className='w-full'>Delete</span>
+                </AlertDialogTrigger>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <AlertDialogDelete deleteAction={handleDelete} text='task' />
+        </AlertDialog>
+      </Dialog>
+
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogEditTask
+          task={row.original}
+          setopen={() => setEditDialogOpen(false)}
+        />
+      </Dialog>
     </div>
   );
 };

@@ -1,4 +1,3 @@
-import { InputError } from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -10,65 +9,59 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { supabase } from '@/utils/supabase/client';
-import { use, useEffect, useState } from 'react';
-import { json } from 'stream/consumers';
+import { Label } from '@/components/ui/label';
+import { useEffect, useState } from 'react';
 import { z } from 'zod';
+import { Task } from '@/types/Task';
 
 const schema = z.object({
-  name: z.string().trim().min(1),
-  description: z.string().trim(),
+  name: z.string(),
+  description: z.string(),
 });
 
-export function DialogNewCategory() {
-  const [open, setopen] = useState(false);
-  const [error, setError] = useState<null | string>(null);
-
+interface Props {
+  task: Task;
+  setopen: () => void;
+}
+export function DialogEditTask({ task, setopen }: Props) {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const newCategory = Object.fromEntries(formData.entries());
-    const result = schema.safeParse(newCategory);
+    const newTask = Object.fromEntries(formData.entries());
+    const result = schema.safeParse(newTask);
     try {
-      if (result.success) {
-        await supabase.from('categories').insert(result.data);
-        setopen(false);
-      } else {
-        setError('error al crear la categoría');
-      }
+      await supabase
+        .from('task')
+        .update(result.data)
+        .eq('task_id', task.task_id);
+
+      setopen();
     } catch (error) {
-      console.error('Failed to add category', error);
+      console.error('Failed to add task', error);
     }
   };
-  useEffect(() => {
-    return () => {
-      setError(null);
-    };
-  }, [open]);
 
   return (
-    <Dialog open={open} onOpenChange={setopen}>
-      <DialogTrigger asChild>
-        <Button variant='default'>New category</Button>
-      </DialogTrigger>
+    <>
       <DialogContent className='sm:max-w-[425px]'>
         <DialogHeader>
-          <DialogTitle> New category</DialogTitle>
+          <DialogTitle> Edit task</DialogTitle>
           <DialogDescription>
-            Create a new category to organize your tasks.
+            Edit a task to organize your tasks.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className='grid gap-4 py-4'>
           <div className='grid grid-cols-4 items-center gap-4'>
-            <Label htmlFor='category' className='text-right'>
-              Category
+            <Label htmlFor='task' className='text-right'>
+              Task
             </Label>
             <Input
-              id='category'
+              id='task'
               name='name'
               className='col-span-3'
               autoComplete='off'
+              defaultValue={task.name}
             />
           </div>
           <div className='grid grid-cols-4 items-center gap-4'>
@@ -80,14 +73,14 @@ export function DialogNewCategory() {
               name='description'
               className='col-span-3'
               autoComplete='off'
+              defaultValue={task.description}
             />
           </div>
-          {error && <InputError message={error} />}
           <DialogFooter>
             <Button type='submit'>Save changes</Button>
           </DialogFooter>
         </form>
       </DialogContent>
-    </Dialog>
+    </>
   );
 }

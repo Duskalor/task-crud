@@ -1,5 +1,5 @@
 import { supabase } from '@/utils/supabase/client';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,12 +15,17 @@ import {
   AlertDialog,
   AlertDialogTrigger,
 } from '../../../components/ui/alert-dialog';
+import { Dialog, DialogTrigger } from '@/components/ui/dialog';
+import { DialogEditCategory } from './dialog-edit-category';
+import { Category } from './categories-table';
 
 interface Props {
-  row: { original: { categories_id: string } };
+  row: { original: Category };
 }
 
 export const ActionsCell = ({ row }: Props) => {
+  const [open, setOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const { categories_id } = row.original;
 
   const handleDelete = async () => {
@@ -38,27 +43,45 @@ export const ActionsCell = ({ row }: Props) => {
       className='relative flex justify-center'
       onClick={(e) => e.stopPropagation()}
     >
-      <AlertDialog>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant='ghost' className='h-8 w-8 p-0'>
-              <span className='sr-only'>Open menu</span>
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align='end'>
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem>Edit</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className='text-red-600 p-0'>
-              <AlertDialogTrigger asChild className='p-2'>
-                <span className='w-full'>Delete</span>
-              </AlertDialogTrigger>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <AlertDialogDelete deleteCategory={handleDelete} />
-      </AlertDialog>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <AlertDialog>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant='ghost' className='h-8 w-8 p-0'>
+                <span className='sr-only'>Open menu</span>
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align='end'>
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem>
+                <DialogTrigger asChild>
+                  <span
+                    className='w-full'
+                    onClick={() => setEditDialogOpen(true)}
+                  >
+                    Edit
+                  </span>
+                </DialogTrigger>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className='text-red-600 p-0'>
+                <AlertDialogTrigger asChild className='p-2'>
+                  <span className='w-full'>Delete</span>
+                </AlertDialogTrigger>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <AlertDialogDelete deleteAction={handleDelete} text='category' />
+        </AlertDialog>
+      </Dialog>
+
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogEditCategory
+          category={row.original}
+          setopen={() => setEditDialogOpen(false)}
+        />
+      </Dialog>
     </div>
   );
 };

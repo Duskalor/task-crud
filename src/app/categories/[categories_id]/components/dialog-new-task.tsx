@@ -1,3 +1,4 @@
+import { InputError } from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -15,12 +16,13 @@ import { useEffect, useState } from 'react';
 import { z } from 'zod';
 
 const schema = z.object({
-  name: z.string(),
-  description: z.string(),
+  name: z.string().trim().min(1),
+  description: z.string().trim(),
 });
 
 export function DialogNewTask({ categories_id }: { categories_id: string }) {
   const [open, setopen] = useState(false);
+  const [error, setError] = useState<null | string>(null);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -28,13 +30,16 @@ export function DialogNewTask({ categories_id }: { categories_id: string }) {
     const newTask = Object.fromEntries(formData.entries());
     const result = schema.safeParse(newTask);
     try {
-      await supabase.from('task').insert({
-        ...result.data,
-        categories_id,
-        status_id: 'df283882-7858-43db-a9dc-d46d4669977c',
-      });
-
-      setopen(false);
+      if (result.success) {
+        await supabase.from('task').insert({
+          ...result.data,
+          categories_id,
+          status_id: 'df283882-7858-43db-a9dc-d46d4669977c',
+        });
+        setopen(false);
+      } else {
+        setError('error al crear la tarea');
+      }
     } catch (error) {
       console.error('Failed to add task', error);
     }
@@ -51,6 +56,12 @@ export function DialogNewTask({ categories_id }: { categories_id: string }) {
     document.addEventListener('keydown', down);
     return () => document.removeEventListener('keydown', down);
   }, []);
+
+  useEffect(() => {
+    return () => {
+      setError(null);
+    };
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={setopen}>
@@ -87,6 +98,7 @@ export function DialogNewTask({ categories_id }: { categories_id: string }) {
               autoComplete='off'
             />
           </div>
+          {error && <InputError message={error} />}
           <DialogFooter>
             <Button type='submit'>Save changes</Button>
           </DialogFooter>

@@ -67,6 +67,7 @@ const columns: ColumnDef<Category>[] = [
 
 export function CategoriesTable({ categories }: { categories: Category[] }) {
   const { data } = useRealtimeCategory(categories);
+
   const [sorting, setSorting] = useState<SortingState>([]);
   const [filtered, setFiltered] = useState('');
   const router = useRouter();
