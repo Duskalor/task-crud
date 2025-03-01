@@ -14,7 +14,7 @@ import { MoreHorizontal } from 'lucide-react';
 import React, { useState } from 'react';
 import { DialogEditTask } from './dialog-edit-task';
 import { Task } from '@/types/Task';
-import { Dialog, DialogTrigger, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 
 interface Props {
   row: { original: Task };
@@ -47,7 +47,7 @@ export const ActionsCell = ({ row }: Props) => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align='end'>
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+              <DropdownMenuItem>
                 <DialogTrigger asChild>
                   <span
                     className='w-full'
@@ -71,8 +71,9 @@ export const ActionsCell = ({ row }: Props) => {
 
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogEditTask
+          open={open}
           task={row.original}
-          setopen={() => setEditDialogOpen(false)}
+          setclose={() => setEditDialogOpen(false)}
         />
       </Dialog>
     </div>

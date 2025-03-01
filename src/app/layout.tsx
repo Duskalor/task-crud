@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/app-sidebar';
-
+import { QueryProviders } from '@/components/provider';
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
@@ -32,7 +32,9 @@ export default function RootLayout({
         <SidebarProvider>
           <AppSidebar />
           <SidebarTrigger />
-          <div className='w-full p-5'>{children}</div>
+          <div className='w-full p-5'>
+            <QueryProviders>{children}</QueryProviders>
+          </div>
         </SidebarProvider>
       </body>
     </html>

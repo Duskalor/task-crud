@@ -2,19 +2,19 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/utils/supabase/client';
 import { Task } from '@/types/Task';
 import { IStatus } from '@/types/Status';
-import { actionsRealTime } from '@/lib/realtime-supabase-task';
+import { actionsRealTimeTask } from '@/lib/realtime-task';
 
-export const useRealTime = (initalTasks: Task[], status: IStatus) => {
+export const useRealTimeTask = (initalTasks: Task[], status: IStatus) => {
   const [tasks, setTasks] = useState<Task[]>(initalTasks);
 
   useEffect(() => {
-    const { actions } = actionsRealTime(status);
+    const { actions } = actionsRealTimeTask(status);
     const subscription = supabase
       .channel('realtime:table_changes')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'task' },
-        async (payload: any) => {
+        (payload: any) => {
           const action = actions[payload.eventType];
           setTasks((prev) => action(prev, payload));
         }

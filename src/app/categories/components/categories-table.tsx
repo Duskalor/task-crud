@@ -17,7 +17,7 @@ import { ActionsCell } from '@/app/categories/components/actions-cell';
 import { supabase } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
 import { DialogNewCategory } from './dialog-new-category';
-import { useRealtimeCategory } from '@/hooks/use-real-time-category';
+import { useRealtimeCategory } from '@/hooks/use-realtime-supabase-category';
 export type Category = {
   categories_id: string;
   name: string;
@@ -65,8 +65,8 @@ const columns: ColumnDef<Category>[] = [
   },
 ];
 
-export function CategoriesTable({ categories }: { categories: Category[] }) {
-  const { data } = useRealtimeCategory(categories);
+export function CategoriesTable() {
+  const { data } = useRealtimeCategory();
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const [filtered, setFiltered] = useState('');

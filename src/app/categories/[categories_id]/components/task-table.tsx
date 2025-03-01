@@ -3,7 +3,6 @@ import { Input } from '@/components/ui/input';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import { DialogNewTask } from './dialog-new-task';
-import { useRealTime } from '@/hooks/use-real-time-task';
 import { Task } from '@/types/Task';
 import { IStatus } from '@/types/Status';
 import { supabase } from '@/utils/supabase/client';
@@ -20,6 +19,7 @@ import {
   flexRender,
   ColumnDef,
 } from '@tanstack/react-table';
+import { useRealTimeTask } from '@/hooks/use-realtime-supabase-task';
 
 const columns: ColumnDef<Task>[] = [
   {
@@ -105,7 +105,7 @@ export const TaskTable = ({
   status: IStatus;
   categoriesName: string;
 }) => {
-  const { data } = useRealTime(tasks, status);
+  const { data } = useRealTimeTask(tasks, status);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setFiltered] = useState('');
 
@@ -134,14 +134,14 @@ export const TaskTable = ({
 
   return (
     <div className='w-full flex flex-col h-full overflow-hidden'>
-      <div className='ml-2 w-full  relative flex items-center flex-col sm:flex-row gap-5 sm:gap-0 justify-between py-4'>
+      <div className=' w-full  relative flex items-center flex-col sm:flex-row gap-5 sm:gap-0 justify-between py-4'>
         <h2 className='text-2xl sm:hidden capitalize font-bold text-center'>
           {categoriesName}
         </h2>
-        <div className='flex w-full px-3 justify-between items-center gap-3'>
+        <div className='flex w-full  justify-between items-center gap-3'>
           <Input
             placeholder='Filters...'
-            className='max-w-sm w-full sm:w-auto focus:outline-none'
+            className='max-w-sm w-full  focus:outline-none'
             value={globalFilter}
             onChange={(e) => setFiltered(e.target.value)}
           />
@@ -155,7 +155,7 @@ export const TaskTable = ({
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className=' max-w-3xl mx-auto  rounded-lg shadow-lg bg-white'
+          className=' max-w-3xl mx-auto mt-10  rounded-lg shadow-lg bg-white'
         >
           <table className='w-full'>
             <thead className='bg-gray-100'>

@@ -1,13 +1,13 @@
 import { IStatus } from '@/types/Status';
 import { Task } from '@/types/Task';
 
-export const actionsRealTime = (status: IStatus) => {
+export const actionsRealTimeTask = (status: IStatus) => {
   const fetchStatus = (statusId: string) => {
     const data = status.find((status) => status.id === statusId);
     return { name: data ? data.name : 'in progress' };
   };
 
-  const actions: Record<string, (payload: any, tasks: Task[]) => Task[]> = {
+  const actions: Record<string, (tasks: Task[], payload: any) => Task[]> = {
     INSERT: (tasks: Task[], payload: any) => {
       const selectStatus = fetchStatus(payload.new.status_id);
       return selectStatus

@@ -1,19 +1,25 @@
 import React from 'react';
-import { createClient } from '@/utils/supabase/server';
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from '@tanstack/react-query';
+import { fetchCategories } from '@/utils/getCategories';
 import { CategoriesTable } from './components/categories-table';
 
-const page = async () => {
-  const supabase = await createClient();
-  const { data: categories, error } = await supabase
-    .from('categories')
-    .select('*');
-  if (error) console.log(error);
-  if (error) return <div>No categories found</div>;
+export default async function Page() {
+  const queryClient = new QueryClient();
+
+  await queryClient.prefetchQuery({
+    queryKey: ['categories'],
+    queryFn: fetchCategories,
+  });
+
   return (
     <section className='h-full'>
-      <CategoriesTable categories={categories} />
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <CategoriesTable />
+      </HydrationBoundary>
     </section>
   );
-};
-
-export default page;
+}

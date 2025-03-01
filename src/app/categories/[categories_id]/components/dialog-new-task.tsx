@@ -12,6 +12,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/utils/supabase/client';
+import { LoaderCircleIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
 
@@ -23,9 +24,11 @@ const schema = z.object({
 export function DialogNewTask({ categories_id }: { categories_id: string }) {
   const [open, setopen] = useState(false);
   const [error, setError] = useState<null | string>(null);
+  const [disabled, setDisabled] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setDisabled(true);
     const formData = new FormData(event.currentTarget);
     const newTask = Object.fromEntries(formData.entries());
     const result = schema.safeParse(newTask);
@@ -38,7 +41,8 @@ export function DialogNewTask({ categories_id }: { categories_id: string }) {
         });
         setopen(false);
       } else {
-        setError('error al crear la tarea');
+        setError('error the create task');
+        setDisabled(false);
       }
     } catch (error) {
       console.error('Failed to add task', error);
@@ -57,14 +61,15 @@ export function DialogNewTask({ categories_id }: { categories_id: string }) {
     return () => document.removeEventListener('keydown', down);
   }, []);
 
-  useEffect(() => {
-    return () => {
-      setError(null);
-    };
-  }, [open]);
-
   return (
-    <Dialog open={open} onOpenChange={setopen}>
+    <Dialog
+      open={open}
+      onOpenChange={(open) => {
+        setopen(open);
+        setDisabled(false);
+        setError(null);
+      }}
+    >
       <DialogTrigger asChild>
         <Button variant='default'>New task</Button>
       </DialogTrigger>
@@ -100,7 +105,13 @@ export function DialogNewTask({ categories_id }: { categories_id: string }) {
           </div>
           {error && <InputError message={error} />}
           <DialogFooter>
-            <Button type='submit'>Save changes</Button>
+            <Button disabled={disabled} type='submit'>
+              {!disabled ? (
+                'Save changes'
+              ) : (
+                <LoaderCircleIcon className='animate-spin' />
+              )}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

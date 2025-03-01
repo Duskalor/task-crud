@@ -80,6 +80,7 @@ export const ActionsCell = ({ row }: Props) => {
         <DialogEditCategory
           category={row.original}
           setopen={() => setEditDialogOpen(false)}
+          open={open}
         />
       </Dialog>
     </div>
