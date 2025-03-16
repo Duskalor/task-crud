@@ -53,11 +53,11 @@ const data = {
   navMain: [
     {
       title: 'DashBoard',
-      url: 'dashboard',
+      url: '/dashboard',
       icon: Bot,
     },
     {
-      title: 'All Tasks',
+      title: 'Tasks',
       url: '#',
       icon: SquareTerminal,
       isActive: true,
@@ -67,8 +67,8 @@ const data = {
           url: '/categories',
         },
         {
-          title: 'Tasks',
-          url: '#',
+          title: 'Remates',
+          url: '/remates',
         },
         {
           title: 'Settings',

@@ -12,7 +12,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/utils/supabase/client';
-import { LoaderCircleIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
 
@@ -21,72 +20,56 @@ const schema = z.object({
   description: z.string().trim(),
 });
 
-export function DialogNewTask({ categories_id }: { categories_id: string }) {
+export function DialogNewCategory() {
   const [open, setopen] = useState(false);
   const [error, setError] = useState<null | string>(null);
-  const [disabled, setDisabled] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setDisabled(true);
     const formData = new FormData(event.currentTarget);
-    const newTask = Object.fromEntries(formData.entries());
-    const result = schema.safeParse(newTask);
+    const newCategory = Object.fromEntries(formData.entries());
+    const result = schema.safeParse(newCategory);
     try {
       if (result.success) {
-        await supabase.from('task').insert({
-          ...result.data,
-          categories_id,
-          status_id: 'df283882-7858-43db-a9dc-d46d4669977c',
-        });
+        await supabase
+          .from('categories')
+          .insert({
+            ...result.data,
+            slug: result.data.name.toLowerCase().replaceAll(' ', '-'),
+          });
         setopen(false);
       } else {
-        setError('error the create task');
-        setDisabled(false);
+        setError('error al crear la categoría');
       }
     } catch (error) {
-      console.error('Failed to add task', error);
+      console.error('Failed to add category', error);
     }
   };
-
   useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        setopen((open) => !open);
-      }
+    return () => {
+      setError(null);
     };
-
-    document.addEventListener('keydown', down);
-    return () => document.removeEventListener('keydown', down);
-  }, []);
+  }, [open]);
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(open) => {
-        setopen(open);
-        setDisabled(false);
-        setError(null);
-      }}
-    >
+    <Dialog open={open} onOpenChange={setopen}>
       <DialogTrigger asChild>
-        <Button variant='default'>New task</Button>
+        <Button variant='default'>New category</Button>
       </DialogTrigger>
       <DialogContent className='sm:max-w-[425px]'>
         <DialogHeader>
-          <DialogTitle> New task</DialogTitle>
+          <DialogTitle> New category</DialogTitle>
           <DialogDescription>
-            Create a new task to organize your tasks.
+            Create a new category to organize your tasks.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className='grid gap-4 py-4'>
           <div className='grid grid-cols-4 items-center gap-4'>
-            <Label htmlFor='task' className='text-right'>
-              Task
+            <Label htmlFor='category' className='text-right'>
+              Category
             </Label>
             <Input
-              id='task'
+              id='category'
               name='name'
               className='col-span-3'
               autoComplete='off'
@@ -105,13 +88,7 @@ export function DialogNewTask({ categories_id }: { categories_id: string }) {
           </div>
           {error && <InputError message={error} />}
           <DialogFooter>
-            <Button disabled={disabled} type='submit'>
-              {!disabled ? (
-                'Save changes'
-              ) : (
-                <LoaderCircleIcon className='animate-spin' />
-              )}
-            </Button>
+            <Button type='submit'>Save changes</Button>
           </DialogFooter>
         </form>
       </DialogContent>

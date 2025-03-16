@@ -13,7 +13,7 @@ import {
 } from '@tanstack/react-table';
 import { ArrowDown, ArrowUp } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { ActionsCell } from '@/app/categories/components/actions-cell';
+import { ActionsCell } from '@/app/(Task)/categories/components/actions-cell';
 import { supabase } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
 import { DialogNewCategory } from './dialog-new-category';
@@ -23,6 +23,7 @@ export type Category = {
   name: string;
   description: string;
   created_at: string;
+  slug: string;
 };
 
 const columns: ColumnDef<Category>[] = [
@@ -161,9 +162,7 @@ export function CategoriesTable() {
                             key={cell.id}
                             className='cursor-pointer'
                             onClick={() => {
-                              router.push(
-                                `/categories/${row.original.categories_id}`
-                              );
+                              router.push(`/categories/${row.original.slug}`);
                             }}
                           >
                             {flexRender(

@@ -7,14 +7,14 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '../../../components/ui/dropdown-menu';
-import { Button } from '../../../components/ui/button';
+} from '../../../../components/ui/dropdown-menu';
+import { Button } from '../../../../components/ui/button';
 import { MoreHorizontal } from 'lucide-react';
-import { AlertDialogDelete } from '../../../components/alert-dialog-delete';
+import { AlertDialogDelete } from '../../../../components/alert-dialog-delete';
 import {
   AlertDialog,
   AlertDialogTrigger,
-} from '../../../components/ui/alert-dialog';
+} from '../../../../components/ui/alert-dialog';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { DialogEditCategory } from './dialog-edit-category';
 import { Category } from './categories-table';

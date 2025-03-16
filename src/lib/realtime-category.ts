@@ -1,4 +1,4 @@
-import { Category } from '@/app/categories/components/categories-table';
+import { Category } from '@/app/(Task)/categories/components/categories-table';
 
 export const actionsRealTimeCategory = () => {
   const actions: Record<

@@ -1,6 +1,6 @@
 'use client';
 import { Input } from '@/components/ui/input';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useIsPresent } from 'framer-motion';
 import { useState } from 'react';
 import { DialogNewTask } from './dialog-new-task';
 import { Task } from '@/types/Task';
@@ -18,6 +18,7 @@ import {
   getFilteredRowModel,
   flexRender,
   ColumnDef,
+  Row,
 } from '@tanstack/react-table';
 import { useRealTimeTask } from '@/hooks/use-realtime-supabase-task';
 
@@ -152,11 +153,7 @@ export const TaskTable = ({
         </h2>
       </div>
       <div className=' w-full'>
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className=' max-w-3xl mx-auto mt-10  rounded-lg shadow-lg bg-white'
-        >
+        <motion.div className='border-collapse max-w-3xl mx-auto mt-10'>
           <table className='w-full'>
             <thead className='bg-gray-100'>
               {table.getHeaderGroups().map((headerGroup) => (
@@ -180,36 +177,13 @@ export const TaskTable = ({
                 </tr>
               ))}
             </thead>
-            <tbody>
+
+            <tbody className='rounded-lg  bg-white overflow-hidden relative'>
               {table.getRowModel().rows?.length ? (
                 <AnimatePresence>
                   {table.getRowModel().rows.map((row, i) => {
                     const id = row.original.task_id;
-                    return (
-                      <motion.tr
-                        className='border-b hover:bg-gray-50 transition'
-                        key={id}
-                        layout='position'
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{
-                          opacity: 0,
-                          position: 'absolute',
-                          width: '100%',
-                          pointerEvents: 'none',
-                        }}
-                        transition={{ duration: 0.3, delay: 0.1 + i * 0.05 }}
-                      >
-                        {row.getVisibleCells().map((cell) => (
-                          <td key={cell.id} className='px-6 py-4'>
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext()
-                            )}
-                          </td>
-                        ))}
-                      </motion.tr>
-                    );
+                    return <TR row={row} key={id} />;
                   })}
                 </AnimatePresence>
               ) : (
@@ -226,3 +200,29 @@ export const TaskTable = ({
     </div>
   );
 };
+
+function TR({ row }: { row: Row<Task> }) {
+  let isPresent = useIsPresent();
+  console.log({ isPresent });
+  return (
+    <motion.tr
+      layout
+      className='hover:bg-gray-50 transition w-full'
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: 'auto' }}
+      exit={{ opacity: 0, height: 0 }}
+      transition={{ duration: 5 }}
+      style={{
+        position: isPresent ? 'relative' : 'absolute',
+        display: isPresent ? 'table-row' : 'flex',
+        alignItems: isPresent ? '' : 'center',
+      }}
+    >
+      {row.getVisibleCells().map((cell) => (
+        <td key={cell.id} className='px-6 py-4'>
+          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+        </td>
+      ))}
+    </motion.tr>
+  );
+}
