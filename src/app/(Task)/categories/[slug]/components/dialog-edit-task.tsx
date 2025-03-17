@@ -33,7 +33,7 @@ export function DialogEditTask({ open, task, setclose }: Props) {
     const formData = new FormData(event.currentTarget);
     const newTask = Object.fromEntries(formData.entries());
     const result = schema.safeParse(newTask);
-    console.log(result);
+    // console.log(result);
     if (!result.success) {
       setErrors('Task name is required');
       return;

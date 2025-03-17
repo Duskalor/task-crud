@@ -1,5 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
-import { CardList } from './components/Card';
+import { CardList } from './components/CardList';
 
 export default async function Remates() {
   const supabase = await createClient();

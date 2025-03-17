@@ -10,7 +10,6 @@ import {
 import { Input } from '@/components/ui/input';
 
 import { Remate } from './Remates.types';
-import { Button } from '@/components/ui/button';
 
 import { SelectLocations } from './select-ubications';
 import { useState } from 'react';
@@ -26,7 +25,12 @@ const monedas = {
   PEN: 'S/.',
 };
 
-export function CardList({ remates }: Props) {
+export function CardList({ remates: data }: Props) {
+  const remates = data.reduce((acc, remate) => {
+    if (acc.find((r) => r.title === remate.title)) return acc;
+    return [...acc, remate];
+  }, [] as Remate[]);
+
   const [filtered, setFiltered] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
   const locations = [...new Set(remates.map((re) => re.location))].sort();
@@ -62,7 +66,7 @@ export function CardList({ remates }: Props) {
           />
         </div>
       </div>
-      <div className='mt-5'>
+      <div className='mt-5 font-bold'>
         Cantidad de resultados: {filteredRematesByLocation.length}
       </div>
 
@@ -75,10 +79,10 @@ export function CardList({ remates }: Props) {
                 className='w-[350px] bg-white shadow-md rounded-lg overflow-hidden border border-gray-200'
               >
                 <CardHeader className='p-4 border-b border-gray-200'>
-                  <CardTitle className='text-lg font-bold text-gray-900'>
+                  <CardTitle className='text-lg font-bold text-gray-900 text-center'>
                     {remate.title}
                   </CardTitle>
-                  <CardDescription className='text-sm text-gray-500 mt-1'>
+                  <CardDescription className='text-sm text-gray-500 mt-1 text-center'>
                     {remate.type}
                   </CardDescription>
                 </CardHeader>
@@ -86,27 +90,29 @@ export function CardList({ remates }: Props) {
                 {/* Contenido */}
                 <CardContent className='p-4 space-y-3'>
                   {/* Descripción */}
-                  <p className='text-sm text-gray-700 line-clamp-3'>
+                  <p className='text-sm text-gray-700 line-clamp-4 '>
                     {remate.description}
                   </p>
 
-                  {/* Ubicación */}
-                  <div>
-                    <p className='text-xs font-semibold text-gray-600 uppercase'>
-                      Ubicación
-                    </p>
-                    <p className='text-sm text-gray-800'>{remate.location}</p>
-                  </div>
+                  <div className='flex justify-between z'>
+                    {/* Ubicación */}
 
-                  {/* Precio */}
-                  <div>
-                    <p className='text-xs font-semibold text-gray-600 uppercase'>
-                      Precio
-                    </p>
-                    <p className='text-base font-bold text-green-600'>
-                      {monedas[remate.price.currency as Currency]}{' '}
-                      {remate.price.amount}
-                    </p>
+                    <div>
+                      <p className='text-xs font-semibold text-gray-600 uppercase'>
+                        Ubicación
+                      </p>
+                      <p className='text-sm text-gray-800'>{remate.location}</p>
+                    </div>
+                    {/* Precio */}
+                    <div>
+                      <p className='text-xs font-semibold text-gray-600 uppercase'>
+                        Precio
+                      </p>
+                      <p className='text-base font-bold text-green-600'>
+                        {monedas[remate.price.currency as Currency]}{' '}
+                        {remate.price.amount}
+                      </p>
+                    </div>
                   </div>
 
                   {/* Fecha de Oferta */}

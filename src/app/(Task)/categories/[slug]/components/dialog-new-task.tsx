@@ -55,6 +55,7 @@ export function DialogNewTask({ categories_id }: { categories_id: string }) {
         e.preventDefault();
         setDisabled(false);
         setopen((open) => !open);
+        setError(null);
       }
     };
 

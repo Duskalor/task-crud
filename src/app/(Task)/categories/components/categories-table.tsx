@@ -1,9 +1,10 @@
 'use client';
 'use no memo';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, useIsPresent } from 'framer-motion';
 import { useState } from 'react';
 import {
   ColumnDef,
+  Row,
   SortingState,
   flexRender,
   getCoreRowModel,
@@ -71,7 +72,6 @@ export function CategoriesTable() {
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const [filtered, setFiltered] = useState('');
-  const router = useRouter();
 
   const table = useReactTable({
     data,
@@ -106,14 +106,8 @@ export function CategoriesTable() {
         />
         <DialogNewCategory />
       </div>
-      <div className=' w-full  mt-10'>
-        <motion.div
-          layout
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className=' max-w-3xl mx-auto overflow-hidden rounded-lg shadow-lg bg-white'
-        >
+      <div className=' w-full'>
+        <div className='border-collapse max-w-3xl mx-auto rounded-lg mt-10'>
           <table className='w-full'>
             <thead className='bg-gray-100'>
               {table.getHeaderGroups().map((headerGroup) => (
@@ -136,43 +130,16 @@ export function CategoriesTable() {
                 </tr>
               ))}
             </thead>
-            <tbody>
+            <motion.tbody
+              transition={{ duration: 0.5 }}
+              layout
+              className='rounded-lg shadow-lg  bg-white overflow-hidden relative w-full'
+            >
               {table.getRowModel().rows?.length ? (
-                <AnimatePresence>
-                  {table.getRowModel().rows.map((row, i) => {
+                <AnimatePresence initial={false}>
+                  {table.getRowModel().rows.map((row) => {
                     const id = row.original.categories_id;
-                    return (
-                      <motion.tr
-                        className='border-b hover:bg-gray-50 transition'
-                        key={id}
-                        layout='position'
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{
-                          opacity: 0,
-                          y: -10,
-                          position: 'absolute',
-                          width: '100%',
-                          pointerEvents: 'none',
-                        }}
-                        transition={{ duration: 0.3, delay: 0.1 + i * 0.05 }}
-                      >
-                        {row.getVisibleCells().map((cell) => (
-                          <td
-                            key={cell.id}
-                            className='cursor-pointer'
-                            onClick={() => {
-                              router.push(`/categories/${row.original.slug}`);
-                            }}
-                          >
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext()
-                            )}
-                          </td>
-                        ))}
-                      </motion.tr>
-                    );
+                    return <TR row={row} key={id} />;
                   })}
                 </AnimatePresence>
               ) : (
@@ -182,10 +149,42 @@ export function CategoriesTable() {
                   </td>
                 </tr>
               )}
-            </tbody>
+            </motion.tbody>
           </table>
-        </motion.div>
+        </div>
       </div>
     </div>
   );
 }
+
+const TR = ({ row }: { row: Row<Category> }) => {
+  const router = useRouter();
+  const isPresent = useIsPresent();
+  return (
+    <motion.tr
+      className=' hover:bg-gray-50 w-full '
+      layout
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: 'auto' }}
+      exit={{ opacity: 0, height: 0 }}
+      transition={{ duration: 0.5 }}
+      style={{
+        position: isPresent ? 'relative' : 'absolute',
+        display: isPresent ? 'table-row' : 'flex',
+        alignItems: isPresent ? '' : 'center',
+      }}
+    >
+      {row.getVisibleCells().map((cell) => (
+        <td
+          key={cell.id}
+          className='cursor-pointer w-1/3'
+          onClick={() => {
+            router.push(`/categories/${row.original.slug}`);
+          }}
+        >
+          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+        </td>
+      ))}
+    </motion.tr>
+  );
+};

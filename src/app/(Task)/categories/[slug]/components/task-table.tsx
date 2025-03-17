@@ -153,7 +153,7 @@ export const TaskTable = ({
         </h2>
       </div>
       <div className=' w-full'>
-        <motion.div className='border-collapse max-w-3xl mx-auto mt-10'>
+        <div className='border-collapse max-w-3xl mx-auto mt-10'>
           <table className='w-full'>
             <thead className='bg-gray-100'>
               {table.getHeaderGroups().map((headerGroup) => (
@@ -178,10 +178,14 @@ export const TaskTable = ({
               ))}
             </thead>
 
-            <tbody className='rounded-lg  bg-white overflow-hidden relative'>
+            <motion.tbody
+              transition={{ duration: 0.5 }}
+              layout
+              className='rounded-lg shadow-lg  bg-white overflow-hidden relative w-full'
+            >
               {table.getRowModel().rows?.length ? (
-                <AnimatePresence>
-                  {table.getRowModel().rows.map((row, i) => {
+                <AnimatePresence initial={false}>
+                  {table.getRowModel().rows.map((row) => {
                     const id = row.original.task_id;
                     return <TR row={row} key={id} />;
                   })}
@@ -193,9 +197,9 @@ export const TaskTable = ({
                   </td>
                 </tr>
               )}
-            </tbody>
+            </motion.tbody>
           </table>
-        </motion.div>
+        </div>
       </div>
     </div>
   );
@@ -203,15 +207,14 @@ export const TaskTable = ({
 
 function TR({ row }: { row: Row<Task> }) {
   let isPresent = useIsPresent();
-  console.log({ isPresent });
   return (
     <motion.tr
       layout
-      className='hover:bg-gray-50 transition w-full'
+      className='hover:bg-gray-50  w-full'
       initial={{ opacity: 0, height: 0 }}
       animate={{ opacity: 1, height: 'auto' }}
       exit={{ opacity: 0, height: 0 }}
-      transition={{ duration: 5 }}
+      transition={{ duration: 0.5 }}
       style={{
         position: isPresent ? 'relative' : 'absolute',
         display: isPresent ? 'table-row' : 'flex',
@@ -219,7 +222,7 @@ function TR({ row }: { row: Row<Task> }) {
       }}
     >
       {row.getVisibleCells().map((cell) => (
-        <td key={cell.id} className='px-6 py-4'>
+        <td key={cell.id} className='px-6 py-4 w-1/4'>
           {flexRender(cell.column.columnDef.cell, cell.getContext())}
         </td>
       ))}

@@ -12,6 +12,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/utils/supabase/client';
+import { LoaderCircleIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
 
@@ -23,20 +24,20 @@ const schema = z.object({
 export function DialogNewCategory() {
   const [open, setopen] = useState(false);
   const [error, setError] = useState<null | string>(null);
+  const [disabled, setDisabled] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setDisabled(true);
     const formData = new FormData(event.currentTarget);
     const newCategory = Object.fromEntries(formData.entries());
     const result = schema.safeParse(newCategory);
     try {
       if (result.success) {
-        await supabase
-          .from('categories')
-          .insert({
-            ...result.data,
-            slug: result.data.name.toLowerCase().replaceAll(' ', '-'),
-          });
+        await supabase.from('categories').insert({
+          ...result.data,
+          slug: result.data.name.toLowerCase().replaceAll(' ', '-'),
+        });
         setopen(false);
       } else {
         setError('error al crear la categoría');
@@ -51,8 +52,29 @@ export function DialogNewCategory() {
     };
   }, [open]);
 
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setDisabled(false);
+        setopen((open) => !open);
+        setError(null);
+      }
+    };
+
+    document.addEventListener('keydown', down);
+    return () => document.removeEventListener('keydown', down);
+  }, []);
+
   return (
-    <Dialog open={open} onOpenChange={setopen}>
+    <Dialog
+      open={open}
+      onOpenChange={(open) => {
+        setopen(open);
+        setDisabled(false);
+        setError(null);
+      }}
+    >
       <DialogTrigger asChild>
         <Button variant='default'>New category</Button>
       </DialogTrigger>
@@ -88,7 +110,13 @@ export function DialogNewCategory() {
           </div>
           {error && <InputError message={error} />}
           <DialogFooter>
-            <Button type='submit'>Save changes</Button>
+            <Button disabled={disabled} type='submit'>
+              {!disabled ? (
+                'Save changes'
+              ) : (
+                <LoaderCircleIcon className='animate-spin' />
+              )}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
