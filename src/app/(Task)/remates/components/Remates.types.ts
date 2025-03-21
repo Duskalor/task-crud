@@ -6,6 +6,7 @@ interface OfferDate {
 interface Price {
   currency: 'USD' | 'PEN' | string;
   amount: string;
+  converted: string;
 }
 
 export interface Remate {
@@ -18,4 +19,11 @@ export interface Remate {
   process: string;
   'Offer Date': OfferDate;
   createdAt: string;
+}
+
+export interface Prices {
+  id: string;
+  compra: string;
+  venta: string;
+  created_at: string;
 }

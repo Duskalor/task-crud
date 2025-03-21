@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Todo List for Duskalor',
-  description: 'It is a todo list for duskalor',
+  title: 'DuskaPages',
+  description: 'a lot of tools for Paul Cruz',
 };
 
 export default function RootLayout({
