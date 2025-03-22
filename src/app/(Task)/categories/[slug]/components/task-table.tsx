@@ -52,6 +52,14 @@ const columns: ColumnDef<Task>[] = [
     size: 250,
   },
   {
+    accessorKey: 'description',
+    header: 'Description',
+    cell: ({ row }) => row.getValue('description'),
+    enableHiding: true, // Permite ocultarla
+    meta: { isHidden: true }, // Meta custom para identificar que está oculta
+    size: 0, // Opcional: hace que sea casi invisible en el layout
+  },
+  {
     accessorKey: 'created_at',
     header: () => <div className='text-center'>Create at</div>,
     cell: ({ row }) => {
@@ -113,7 +121,13 @@ export const TaskTable = ({
   const table = useReactTable({
     data,
     columns,
-    state: { sorting, globalFilter },
+    state: {
+      sorting,
+      globalFilter,
+      columnVisibility: {
+        description: false,
+      },
+    },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),

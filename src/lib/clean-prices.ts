@@ -1,6 +1,6 @@
 import { Prices, Remate } from '@/app/(Task)/remates/components/Remates.types';
 
-export const cleanRemates = (remates: Remate[], prices: Prices[]) => {
+export const cleanRemates = (remates: Remate[], prices: Prices) => {
   const cleanPrices = (currency: string, amount: string) => {
     type Currency = 'PEN' | 'USD';
     const Locate: Record<string, Currency> = {
@@ -10,9 +10,7 @@ export const cleanRemates = (remates: Remate[], prices: Prices[]) => {
 
     const getPrice = parseFloat(amount.replace(/,/g, ''));
     const getCurrency =
-      currency === 'USD'
-        ? parseFloat(prices[0].venta)
-        : parseFloat(prices[0].compra);
+      currency === 'USD' ? parseFloat(prices.venta) : parseFloat(prices.compra);
 
     const price =
       currency === 'USD' ? getPrice * getCurrency : getPrice / getCurrency;

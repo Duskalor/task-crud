@@ -14,13 +14,12 @@ export default async function Remates() {
   const { data: prices, error: PricesError } = await supabase
     .from('exchangerate')
     .select('*')
-    .order('created_at', { ascending: true })
-    .limit(1);
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
 
   if (PricesError) <div>An error occurred while fetching data</div>;
   if (!prices) return <div>No data found</div>;
-
   const remates = cleanRemates(rawRemates, prices);
-  console.log(remates);
-  return <CardList remates={remates} prices={prices[0]} />;
+  return <CardList remates={remates} prices={prices} />;
 }
